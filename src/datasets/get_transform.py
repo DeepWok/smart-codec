@@ -8,6 +8,8 @@ def get_transform(name):
         return cifar10_transform()
     elif name in ['cifar100']:
         return cifar100_transform()
+    elif name in ['hamming', 'Hamming']:
+        return transforms.ToTensor(), transforms.ToTensor()
 
 
 def imagnet_transform(is_train):

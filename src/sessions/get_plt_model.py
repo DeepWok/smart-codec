@@ -1,10 +1,15 @@
 import pytorch_lightning as pl
 import torch
 import numpy as np
-from torchmetrics.functional import accuracy
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from warmup_scheduler import GradualWarmupScheduler
 
+
+def accuracy(y_hat, y, threshold=0.5):
+    y_hat = torch.sigmoid(y_hat)
+    y_hat = y_hat > threshold
+    acc = (y_hat == y).sum()/y.numel()
+    return acc
 
 
 class ModelWrapper(pl.LightningModule):
@@ -14,15 +19,13 @@ class ModelWrapper(pl.LightningModule):
             model, 
             learning_rate=5e-4, 
             epochs=200,
-            optimizer=None,
-            dropblock_style=None):
+            optimizer=None):
         super().__init__()
         self.model = model
         self.learning_rate = learning_rate
-        self.loss = torch.nn.CrossEntropyLoss()
+        self.loss = torch.nn.BCEWithLogitsLoss()
         self.epochs = epochs
         self.optimizer = optimizer
-        self.dropblock_style = dropblock_style
         self.train_losses = []
         self.val_losses = []
         # self.optimizer_map = {
@@ -104,27 +107,3 @@ class ModelWrapper(pl.LightningModule):
         return {
             "optimizer": opt,
             "lr_scheduler":  scheduler}
-    
-    def avg_my_outputs(self, outputs, key):
-        vals = [o[key].detach().cpu().numpy() for o in outputs]
-        return sum(vals) / len(vals)
-
-    def training_epoch_end(self, outputs):
-        if self.dropblock_style is None:
-            return
-        if self.dropblock_style == 'milestone':
-            self.milestone_based_schedule()
-        elif self.dropblock_style == 'monitor':
-            self.train_losses.append(self.avg_my_outputs(outputs, 'loss'))
-        elif self.dropblock_style == 'linear':
-            self.linear_based_schedule()
-        else:
-            raise ValueError(f"{self.dropblock_style} is not supported.")
-
-    def validation_epoch_end(self, outputs):
-        if self.dropblock_style is None:
-            return
-        if self.dropblock_style == 'monitor':
-            self.val_losses.append(self.avg_my_outputs(outputs, 'val_loss'))
-            self.loss_based_schedule()
-    

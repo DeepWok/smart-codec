@@ -5,9 +5,14 @@ from torch import nn
 class SimpleNet(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
-        self.fc1 = nn.Linear(784, 256)
-        self.fc2 = nn.Linear(256, 128)
-        self.fc3 = nn.Linear(128, num_classes)
+        self.network = nn.Sequential(
+            nn.Linear(16, 256),
+            nn.ReLU(),
+            nn.Linear(256, 256),
+            nn.ReLU(),
+            nn.Linear(256, 256),
+            nn.ReLU(),
+            nn.Linear(256, num_classes))
     
     def forward(self, x):
-        return self.fc3(self.fc2(self.fc1(x)))
+        return self.network(x)

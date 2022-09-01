@@ -19,7 +19,7 @@ from .get_plt_model import ModelWrapper
 def train(
         model, 
         train_loader, val_loader, 
-        learning_rate, trainer_args, save_path, optimizer, dropblock_style):
+        learning_rate, trainer_args, save_path, optimizer):
     checkpoint_callback = ModelCheckpoint(
         save_top_k=1,
         monitor="val_acc",
@@ -33,7 +33,6 @@ def train(
         model, 
         learning_rate=learning_rate, 
         epochs=trainer_args['max_epochs'],
-        optimizer=optimizer,
-        dropblock_style=dropblock_style)
+        optimizer=optimizer)
     trainer = pl.Trainer(**trainer_args)
     trainer.fit(plt_model, train_loader, val_loader)

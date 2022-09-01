@@ -7,4 +7,5 @@ dataset_info = {
     'cifar10': {'num_classes': 10},
     'cifar100': {'num_classes': 100},
     'imagenet': {'num_classes': 1000},
+    'hamming': {'num_classes': 21},
 }
